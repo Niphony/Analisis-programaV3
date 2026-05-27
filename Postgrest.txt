@@ -1,0 +1,179 @@
+-- Creacion de tablas
+
+-- Usuario
+CREATE TABLE IF NOT EXISTS usuarios (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password_hash VARCHAR(64) NOT NULL,
+    rol VARCHAR(20) NOT NULL CHECK (rol IN ('estudiante','docente','administrativo')),
+    nombre VARCHAR(100) NOT NULL,
+    email VARCHAR(100),
+    activo BOOLEAN DEFAULT TRUE,
+    creado_en TIMESTAMP DEFAULT NOW()
+);
+
+-- Materia
+CREATE TABLE IF NOT EXISTS materias (
+    id SERIAL PRIMARY KEY,
+    codigo VARCHAR(20) UNIQUE NOT NULL,
+    nombre VARCHAR(100) NOT NULL,
+    creditos INT DEFAULT 3,
+    activa BOOLEAN DEFAULT TRUE
+);
+
+-- Periodo academico
+CREATE TABLE IF NOT EXISTS periodos (
+    id SERIAL PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL,
+    activo BOOLEAN DEFAULT FALSE
+);
+
+-- Cursos
+CREATE TABLE IF NOT EXISTS cursos (
+    id SERIAL PRIMARY KEY,
+    materia_id INT REFERENCES materias(id),
+    docente_id INT REFERENCES usuarios(id),
+    periodo_id INT REFERENCES periodos(id),
+    dia_semana VARCHAR(20),
+    hora_inicio TIME,
+    hora_fin TIME,
+    aula VARCHAR(30),
+    cupo_max INT DEFAULT 30,
+    activa BOOLEAN DEFAULT TRUE
+);
+
+-- Solicitud de inscripcion
+CREATE TABLE IF NOT EXISTS solicitudes_inscripcion (
+    id SERIAL PRIMARY KEY,
+    estudiante_id INT REFERENCES usuarios(id),
+    periodo_id INT REFERENCES periodos(id),
+    estado VARCHAR(20) DEFAULT 'pendiente' CHECK (estado IN ('pendiente','aprobada','rechazada')),
+    fecha_solicitud TIMESTAMP DEFAULT NOW(),
+    observaciones TEXT
+);
+
+-- Detalles de solicitud
+CREATE TABLE IF NOT EXISTS solicitud_materias (
+    id SERIAL PRIMARY KEY,
+    solicitud_id INT REFERENCES solicitudes_inscripcion(id),
+    materia_id INT REFERENCES materias(id)
+);
+
+-- Inscripciones
+CREATE TABLE IF NOT EXISTS inscripciones (
+    id SERIAL PRIMARY KEY,
+    estudiante_id INT REFERENCES usuarios(id),
+    curso_id INT REFERENCES cursos(id),
+    periodo_id INT REFERENCES periodos(id),
+    fecha_inscripcion TIMESTAMP DEFAULT NOW(),
+    UNIQUE(estudiante_id, curso_id, periodo_id)
+);
+
+-- Notas
+CREATE TABLE IF NOT EXISTS notas (
+    id SERIAL PRIMARY KEY,
+    inscripcion_id INT REFERENCES inscripciones(id) UNIQUE,
+    -- Primer corte (35%)
+    p1_nota1 NUMERIC(5,2) DEFAULT 0 CHECK (p1_nota1 >= 0 AND p1_nota1 <= 50),
+    p1_nota2 NUMERIC(5,2) DEFAULT 0 CHECK (p1_nota2 >= 0 AND p1_nota2 <= 50),
+    p1_nota3 NUMERIC(5,2) DEFAULT 0 CHECK (p1_nota3 >= 0 AND p1_nota3 <= 50),
+    p1_peso1 NUMERIC(5,2) DEFAULT 0,
+    p1_peso2 NUMERIC(5,2) DEFAULT 0,
+    p1_peso3 NUMERIC(5,2) DEFAULT 0,
+    -- Segundo corte (35%)
+    p2_nota1 NUMERIC(5,2) DEFAULT 0 CHECK (p2_nota1 >= 0 AND p2_nota1 <= 50),
+    p2_nota2 NUMERIC(5,2) DEFAULT 0 CHECK (p2_nota2 >= 0 AND p2_nota2 <= 50),
+    p2_nota3 NUMERIC(5,2) DEFAULT 0 CHECK (p2_nota3 >= 0 AND p2_nota3 <= 50),
+    p2_peso1 NUMERIC(5,2) DEFAULT 0,
+    p2_peso2 NUMERIC(5,2) DEFAULT 0,
+    p2_peso3 NUMERIC(5,2) DEFAULT 0,
+    -- Tercer corte (30%)
+    examen_final NUMERIC(5,2) DEFAULT 0 CHECK (examen_final >= 0 AND examen_final <= 50),
+    habilitacion NUMERIC(5,2) DEFAULT 0 CHECK (habilitacion >= 0 AND habilitacion <= 50),
+    nota_definitiva NUMERIC(5,2) DEFAULT 0,
+    publicado BOOLEAN DEFAULT FALSE
+);
+
+
+-- Insercion de datos
+
+-- Insercion de periodo académico
+INSERT INTO periodos (nombre, activo)
+VALUES ('2026-2', TRUE);
+
+-- Insercion de materias
+INSERT INTO materias (codigo, nombre, creditos) VALUES
+('MAT101', 'Cálculo I', 4),
+('MAT102', 'Cálculo II', 4),
+('FIS101', 'Física I', 4),
+('FIS102', 'Física II', 4),
+('INF101', 'Introducción a la Programación', 3),
+('INF102', 'Estructuras de Datos', 3),
+('INF201', 'Base de Datos', 3),
+('INF202', 'Redes de Computadores', 3),
+('INF301', 'Ingeniería de Software', 3),
+('MAT201', 'Álgebra Lineal', 3),
+('MAT202', 'Estadística', 3),
+('HUM101', 'Ética Profesional', 2);
+
+-- Insercion de 20 Estudiantes
+INSERT INTO usuarios (username, password_hash, rol, nombre, email) VALUES
+('est1', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'estudiante', 'Gabriel Fernando Lozano Echeverry', 'est1@udistrital.edu.co'),
+('est2', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'estudiante', 'Carlos López', 'est2@udistrital.edu.co'),
+('est3', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'estudiante', 'María Rodríguez', 'est3@udistrital.edu.co'),
+('est4', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'estudiante', 'José Martínez', 'est4@udistrital.edu.co'),
+('est5', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'estudiante', 'Laura Sánchez', 'est5@udistrital.edu.co'),
+('est6', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'estudiante', 'Diego Pérez', 'est6@udistrital.edu.co'),
+('est7', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'estudiante', 'Valentina Torres', 'est7@udistrital.edu.co'),
+('est8', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'estudiante', 'Andrés Flores', 'est8@udistrital.edu.co'),
+('est9', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'estudiante', 'Daniela Ruiz', 'est9@udistrital.edu.co'),
+('est10', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'estudiante', 'Miguel Vargas', 'est10@udistrital.edu.co'),
+('est11', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'estudiante', 'Camila Morales', 'est11@udistrital.edu.co'),
+('est12', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'estudiante', 'Sebastián Castro', 'est12@udistrital.edu.co'),
+('est13', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'estudiante', 'Isabella Jiménez', 'est13@udistrital.edu.co'),
+('est14', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'estudiante', 'Felipe Herrera', 'est14@udistrital.edu.co'),
+('est15', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'estudiante', 'Natalia Rojas', 'est15@udistrital.edu.co'),
+('est16', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'estudiante', 'Alejandro Díaz', 'est16@udistrital.edu.co'),
+('est17', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'estudiante', 'Sofía Mendoza', 'est17@udistrital.edu.co'),
+('est18', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'estudiante', 'Mateo Gómez', 'est18@udistrital.edu.co'),
+('est19', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'estudiante', 'Juliana Ortiz', 'est19@udistrital.edu.co'),
+('est20', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'estudiante', 'Santiago Reyes', 'est20@udistrital.edu.co');
+
+-- Inserción de 12 Docentes
+INSERT INTO usuarios (username, password_hash, rol, nombre, email) VALUES
+('doc1', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'docente', 'Dr. Roberto Álvarez', 'doc1@udistrital.edu.co'),
+('doc2', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'docente', 'Dra. Carmen Vega', 'doc2@udistrital.edu.co'),
+('doc3', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'docente', 'Mg. Luis Bermúdez', 'doc3@udistrital.edu.co'),
+('doc4', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'docente', 'Dra. Patricia Suárez', 'doc4@udistrital.edu.co'),
+('doc5', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'docente', 'Dr. Fernando Ríos', 'doc5@udistrital.edu.co'),
+('doc6', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'docente', 'Mg. Gloria Medina', 'doc6@udistrital.edu.co'),
+('doc7', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'docente', 'Dr. Héctor Navarro', 'doc7@udistrital.edu.co'),
+('doc8', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'docente', 'Dra. Teresa Aguilar', 'doc8@udistrital.edu.co'),
+('doc9', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'docente', 'Mg. Ricardo Espinoza', 'doc9@udistrital.edu.co'),
+('doc10', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'docente', 'Dr. Adriana Guerrero', 'doc10@udistrital.edu.co'),
+('doc11', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'docente', 'Mg. Julio Molina', 'doc11@udistrital.edu.co'),
+('doc12', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'docente', 'Dra. Silvia Parra', 'doc12@udistrital.edu.co');
+
+-- Insercion 3 Administrativos
+INSERT INTO usuarios (username, password_hash, rol, nombre, email) VALUES
+('admin1', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'administrativo', 'Pedro Coordinador', 'admin01@udistrital.edu.co'),
+('admin2', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'administrativo', 'Rosa Registraduría', 'admin02@udistrital.edu.co'),
+('admin3', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'administrativo', 'Jorge Secretaría', 'admin03@udistrital.edu.co');
+
+
+-- Estudiantes
+SELECT id, username, nombre, email FROM usuarios WHERE rol = 'estudiante';
+
+-- Docentes
+SELECT id, username, nombre, email FROM usuarios WHERE rol = 'docente';
+
+-- Administrativos
+SELECT id, username, nombre, email FROM usuarios WHERE rol = 'administrativo';
+
+-- Curso
+SELECT c.id, m.nombre AS materia, u.nombre AS docente, p.nombre AS periodo,
+       c.dia_semana, c.hora_inicio, c.hora_fin, c.aula
+FROM cursos c, materias m, usuarios u, periodos p
+WHERE c.materia_id = m.id
+  AND c.docente_id = u.id
+  AND c.periodo_id = p.id;
