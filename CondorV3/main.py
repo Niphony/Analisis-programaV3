@@ -13,7 +13,7 @@ def main():
     if not ok:
         sys.exit(1)
 
-    root = tk.Tk()
+    root = tk.Tk()  #Sale la ventana
     from views.login_view import LoginWindow
     LoginWindow(root)
     root.mainloop()

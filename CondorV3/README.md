@@ -22,7 +22,7 @@ Edita `db/connection.py` si tus credenciales de Postgres son diferentes:
 DB_CONFIG = {
     "host": "localhost",
     "port": 5432,
-    "database": "academia_db",
+    "database": "condor_db",
     "user": "postgres",
     "password": "postgres"   # ← cambia esto
 }
@@ -30,12 +30,13 @@ DB_CONFIG = {
 
 ## Inicialización
 
+Iniciar el entorno de python env *en la raiz del proyecto* 
 ```bash
-# Crear tablas y datos de prueba
-python db/setup.py
-```
+python -m venv venv
+source venv/bin/activate
+``` 
 
-Esto crea:
+En la base hay:
 - 20 estudiantes (`est01`–`est20`)
 - 12 docentes (`doc01`–`doc12`)
 - 3 administrativos (`admin01`–`admin03`)
@@ -43,6 +44,12 @@ Esto crea:
 - 1 periodo activo: **2024-2**
 
 **Contraseña de todos los usuarios: `123456`**
+
+Para volcar la bd:
+
+```bash
+psql -h localhost -U tu_usuario_postgres -d condor_db -f Postgrest.txt
+```
 
 ## Ejecución
 
@@ -112,4 +119,4 @@ Ejemplo:
 - 2do corte: nota 45 peso 35% → subtotal = 15.75
 - Examen: 42 → 42×0.20 = 8.4 | Habilitación: 0 → 0
 - **Definitiva: 13.25 + 15.75 + 8.4 = 37.4 / 100**
-  *(escala 0–100, o ajusta divisor según tu institución)*
+  
