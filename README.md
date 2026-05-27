@@ -22,9 +22,9 @@ Edita `db/connection.py` si tus credenciales de Postgres son diferentes:
 DB_CONFIG = {
     "host": "localhost",
     "port": 5432,
-    "database": "condor_db",
-    "user": "postgres",
-    "password": "postgres"   # ← cambia esto
+    "database": "Nombre de la base de datos",
+    "user": "Su usario",
+    "password": "Su contraseña"   
 }
 ```
 
