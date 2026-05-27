@@ -5,9 +5,9 @@ from psycopg2.extras import RealDictCursor
 DB_CONFIG = {
     "host": "localhost",
     "port": 5432,
-    "database": "SGA",
-    "user": "Gabo",
-    "password": "Zelda TOTK"
+    "database": "Nombre de la base de datos",
+    "user": "Su usuario",
+    "password": "Su contraseña"
 }
 
 def get_connection():
